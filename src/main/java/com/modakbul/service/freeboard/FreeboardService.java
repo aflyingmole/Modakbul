@@ -93,7 +93,6 @@ public class FreeboardService {
 
 	    List<Freeboard> freeboards = freeboardPage.getContent();
 
-	    System.out.println("Page: " + page + ", Loaded Posts: " + freeboards.size());
 
 	    // 엔티티에서 DTO로 변환하여 반환
 	    List<FreeboardDto> freeboardDtos = freeboards.stream().map(freeboard -> {
@@ -113,6 +112,7 @@ public class FreeboardService {
 	        return FreeboardDto.builder()
 	                .id(freeboard.getId())
 	                .memberId(freeboard.getMember().getId())
+	                .userId(freeboard.getMember().getUserId()) 
 	                .title(freeboard.getTitle())
 	                .content(freeboard.getContent())
 	                .createdAt(freeboard.getCreatedAt())
@@ -311,7 +311,6 @@ public class FreeboardService {
 	        fileUploadService.deleteFile(saveFileName); // S3에서 파일 삭제
 
 	        // 데이터베이스에서 파일 정보 삭제
-	        System.out.println("Deleting file: " + saveFileName + " for Freeboard ID: " + freeboardId);
 	        freeboardImageRepository.deleteBySaveFileNameAndFreeboardId(saveFileName, freeboardId);
 	    }
 	    

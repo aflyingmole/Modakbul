@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -23,9 +24,13 @@ public class HomeController {
     @GetMapping("/")
     public String home(@AuthenticationPrincipal CustomUserDetails member, Model model) {
         // 모든 캠핑장 정보 가져오기
-        List<CampgroundDto> campgrounds = campgroundService.getAllCampgrounds();
-        List<CampgroundDto> campgroundsWithImages = campgroundService.getCampgroundWithImages(campgrounds);
-
+        List<CampgroundDto> allCampgrounds = campgroundService.getAllCampgrounds();
+        // approve가 2인 캠핑장만 필터링
+        List<CampgroundDto> approvedCampgrounds = allCampgrounds.stream()
+            .filter(campground -> campground.getApprove() == 2)
+            .collect(Collectors.toList());
+        List<CampgroundDto> campgroundsWithImages = campgroundService.getCampgroundWithImages(approvedCampgrounds);
+        
         // 3개씩 나누어 그룹화
         List<List<CampgroundDto>> chunkedCampgrounds = new ArrayList<>();
         for (int i = 0; i < campgroundsWithImages.size(); i += 3) {
@@ -38,9 +43,6 @@ public class HomeController {
             model.addAttribute("member", member);
             model.addAttribute("role", member.getRole());
 
-            System.out.println("UserDetails member: " + member.getUserName());
-        } else {
-            System.out.println("No valid authentication found.");
         }
 
         return "home";

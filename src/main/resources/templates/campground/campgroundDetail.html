@@ -16,7 +16,8 @@
 <!--이미지 넣어야함-->
 <th:block th:if="${campground != null}">
     <th:block th:if="${campground.getCampgroundImages() != null and campground.getCampgroundImages().size() > 0}">
-        <img th:src="@{/upload/{saveFileName}(saveFileName=${campground.getCampgroundImages()[0].saveFileName})}" class="card-img-top" alt="캠핑장 사진" style="height: 300px; object-fit: cover;" th:alt="${campground.getCampgroundImages()[0].fileName}">
+        <img th:src="${campground.campgroundImages[0].imagePath}"
+             class="card-img-top" alt="캠핑장 사진" style="height: 300px; object-fit: cover;" th:alt="${campground.getCampgroundImages()[0].fileName}">
     </th:block>
 </th:block>
 
@@ -55,18 +56,22 @@
             <span th:text="${campground.campgroundName}">Camp Name</span>
             <a th:if="${memberId == null}" class="btn btn-link" style="margin-left: 10px;">
             </a>
-            <a th:if="${campground.hostId == memberId}" th:href="@{/chat/chatList(campgroundId=${campground.id})}" class="btn btn-link" style="margin-left: 10px;">
-                게스트 채팅 리스트
-            </a>
-            <a th:if="${campground.hostId != memberId}" th:href="@{/chat/chatroom/{campgroundId}(campgroundId=${campground.id})}" class="btn btn-link" style="margin-left: 10px;">
-                호스트와 채팅하기
-            </a>
+            <a th:if="${campground.hostId == memberId}" 
+ 			 	 th:href="@{/chat/chatList(campgroundId=${campground.id})}" 
+  				 class="btn btn-chat-list" style="margin-left: 10px;">
+  			  	게스트 채팅 리스트
+			</a>
+			<a th:if="${campground.hostId != memberId}" 
+  			 th:href="@{/chat/chatroom/{campgroundId}(campgroundId=${campground.id})}" 
+  			 class="btn btn-chat-list" style="margin-left: 10px;">
+  			  호스트와 채팅하기
+			</a>
         </p>
         <p><strong>주소:</strong> <span th:text="${campground.address}">Address</span></p>
         <p><strong>전화번호:</strong> <span th:text="${campground.phone}">123-456-7890</span></p>
     </div>
 
-    <form action="/booking/new" method="get" onsubmit="return validateForm();" class="mb-4">
+    <form id="bookingForm" action="/booking/new" method="get" onsubmit="return validateForm();" class="mb-4">
         <input type="hidden" id="checkInDate" name="checkInDate">
         <input type="hidden" id="checkOutDate" name="checkOutDate">
         <input type="hidden" id="campsiteId" name="campsiteId">
@@ -76,6 +81,7 @@
             <thead>
             <tr>
                 <th>캠핑장 객실</th>
+                <th>이미지</th>
                 <th>설명</th>
                 <th>최대 인원</th>
                 <th>총 가격</th>
@@ -84,9 +90,19 @@
             </thead>
             <tbody>
             <tr th:each="campsite : ${campsites}" th:id="'campsite-row-' + ${campsite.id}">
-                <td th:text="${campsite.id}">Campsite ID</td>
-                <td th:text="${campsite.campsiteName}">Campsite Name</td>
+                <td th:text="${campsite.campsiteName}">Campsite 이름</td>
+                <td>
+                    <div th:if="${campsite.campsiteImages != null and !campsite.campsiteImages.isEmpty()}">
+                        <img th:src="${campsite.campsiteImages[0].imagePath}"
+                             th:alt="${campsite.campsiteImages[0].fileName}"
+                             style="width: 100px; height: auto;" /> <!-- 첫 번째 이미지 출력 -->
+                    </div>
+                    <div th:if="${campsite.campsiteImages == null or campsite.campsiteImages.isEmpty()}">
+                        <span>이미지 없음</span> <!-- 이미지가 없을 경우 대체 텍스트 -->
+                    </div>
+                </td>
                 <td th:text="${campsite.campsiteDescription}">Description</td>
+                <td th:text="${campsite.headCount}">head count</td>
                 <td class="total-price" th:text="'총가격 : ' + ${(totalPrices[campsite.id])} + ' 원'">Total Price</td>
                 <td>
                     <!-- 예약 버튼: 예약 가능할 때만 보이도록 설정 -->
